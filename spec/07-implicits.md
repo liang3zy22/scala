@@ -270,7 +270,7 @@ the type:
 - For a singleton type,  ´\mathit{ttcs}(p.type) ~=~ \mathit{ttcs}(T)´, provided ´p´ has type ´T´;
 - For a compound type, `´\mathit{ttcs}(T_1´ with ´\ldots´ with ´T_n)´` ´~=~ \mathit{ttcs}(T_1) \cup \ldots \cup \mathit{ttcs}(T_n)´.
 
-The _complexity_ ´\operatorname{complexity}(T)´ of a core type is an integer which also depends on the form of
+The ´\operatorname{complexity}(T)´ of a core type is an integer which also depends on the form of
 the type:
 
 - For a type designator, ´\operatorname{complexity}(p.c) ~=~ 1 + \operatorname{complexity}(p)´

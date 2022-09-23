@@ -73,7 +73,7 @@ abstract class Any {
 }
 
 /** The root class of all value types */
-final class AnyVal extends Any
+abstract class AnyVal extends Any
 
 /** The root class of all reference types */
 class AnyRef extends Any {

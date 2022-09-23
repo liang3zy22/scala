@@ -404,7 +404,7 @@ A pattern ´p´ is _irrefutable_ for a type ´T´, if one of the following appli
     irrefutable for ´T_i´.
 1.  ´p´ is an extractor pattern for which the extractor type is `Some[´T´]` for
     some type ´T´
-1.  ´p´ is an extractor pattern for which the extractor types `isEmpty` method
+1.  ´p´ is an extractor pattern for which the extractor type's `isEmpty` method
     is the singleton type `false`
 1.  ´p´ is an extractor pattern for which the return type is the singleton type
     `true`
@@ -646,7 +646,7 @@ instead typed with a modified expected type ´T'´ which results from
 *undefined*.  If this second step fails also, a compile-time
 error results. If the second step succeeds, let ´T_p´ be the type of
 pattern ´p´ seen as an expression. One then determines minimal bounds
-´L_11 , \ldots , L_m'´ and maximal bounds ´U_1' , \ldots , U_m'´ such
+´L_1' , \ldots , L_m'´ and maximal bounds ´U_1' , \ldots , U_m'´ such
 that for all ´i´, ´L_i <: L_i'´ and ´U_i' <: U_i´ and the following
 constraint system is satisfied:
 
