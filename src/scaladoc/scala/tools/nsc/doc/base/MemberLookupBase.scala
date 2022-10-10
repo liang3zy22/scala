@@ -59,15 +59,22 @@ trait MemberLookupBase {
     } else ""
 
   def memberLookup(pos: Position, query: String, site: Symbol): LinkTo = {
+    println("into member lookup method")
+    println(s"the site string is ${site.toString} ")
     val members = breakMembers(query)
-
+    print("the members are ")
+    members.foreach(x => print(x.toString + " "))
+    println("")
     // (1) First look in the root package, as most of the links are qualified
     val fromRoot = lookupInRootPackage(pos, members)
+    if (fromRoot.isEmpty) println("from root is empty")
 
     // (2) Or recursively go into each containing template.
+    LazyList.iterate(site)(_.owner).takeWhile(!isRoot(_)).foreach(x => println("symbol is " + x.toString))
     val fromParents = LazyList.iterate(site)(_.owner) takeWhile (!isRoot(_)) map (lookupInTemplate(pos, members, _))
-
     val syms = (fromRoot +: fromParents).find(_.nonEmpty).getOrElse(Nil)
+    if (syms.isEmpty) {
+      println("syms is empty")}
 
     val links = syms flatMap { case (sym, site) => internalLink(sym, site) } match {
       case Nil =>
@@ -77,8 +84,9 @@ trait MemberLookupBase {
             findExternalLink(sym, "")
           else if (owner.isClass || owner.isModule || owner.isTrait || owner.hasPackageFlag)
             findExternalLink(owner, externalSignature(sym))
-          else
+          else {
             None
+          }
         }
       case links => links
     }
@@ -164,6 +172,10 @@ trait MemberLookupBase {
     def termSyms = cleanupBogusClasses(syms(newTermName(name)))
     def typeSyms = cleanupBogusClasses(syms(newTypeName(name)))
 
+    println(s"container is ${container.toString}")
+    //container.info.members.foreach(x => if (x.isModule) println(s"${x.toString} is module related definition"))
+    container.info.members.foreach(x => if (x.hasPackageFlag) println(s"${x.toString} is package related definition"))
+    container.info.members.foreach(x => println(x.toString))
     val result = if (member.endsWith("$"))
       termSyms
     else if (member.endsWith("!"))
@@ -182,8 +194,36 @@ trait MemberLookupBase {
         case OnlyTerm => termSyms
       }
 
-    //println("lookupInTemplate(" + member + ", " + container + ") => " + result)
-    result
+    val results = result.isEmpty match {
+      case false => result
+      case _ => {
+        val typemembers = container.info.members.filter(x => (!x.hasPackageFlag)&&(x.isType || x.isModule) )
+        if (typemembers.isEmpty) Nil
+        else {
+            val memresults = typemembers.map(lookupInTemplate(pos, member,_, strategy)).filter(!_.isEmpty)
+            memresults.isEmpty match {
+              case true => Nil
+              case false =>
+                 if(memresults.size >1){runReporting.warning(pos, "duplicated links", WarningCategory.Scaladoc,container); Nil}
+                 else memresults.head
+            }
+        }
+      }
+    }
+   //if (result.isEmpty)
+   //  {println("can't get result now...")
+    //   val linklist = container.info.members.filter(x => (!x.hasPackageFlag)&& (x.isClass || x.isTrait || x.isModule))
+   //    .map(y => lookupInTemplate(pos, member, y, strategy)).filter(!_.isEmpty)
+   //   if(linklist.size >1) {runReporting.warning(pos, "duplicated links", WarningCategory.Scaladoc,container); Nil}
+   //   else if(linklist.isEmpty) {
+   //       Nil
+   //   }
+    //   else {linklist.head}
+    // }
+   //else result
+
+    println("lookupInTemplate(" + member + ", " + container + ") => " + results)
+    results
   }
 
   private def breakMembers(query: String): List[String] = {
